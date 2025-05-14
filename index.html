@@ -8,21 +8,24 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+    // Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCvvYi9qJs7dyManXDTeZdzlJBM0LtoK2s",
       authDomain: "norre-contact.firebaseapp.com",
       databaseURL: "https://norre-contact-default-rtdb.firebaseio.com",
       projectId: "norre-contact",
-      storageBucket: "norre-contact.firebasestorage.app",
+      storageBucket: "norre-contact.appspot.com", // Fixed storage bucket URL
       messagingSenderId: "806156518579",
       appId: "1:806156518579:web:df364a0e32eb82a0735cc6",
       measurementId: "G-92RXL1M55S"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-    window.submitVote = async () => {
+    
+    // Make sure the function is available in the global scope
+    window.submitVote = async function() {
       const phoneNumber = document.getElementById("phoneNumber").value.trim();
       const voteFor = document.getElementById("voteFor").value.trim();
 
@@ -36,7 +39,7 @@
         return;
       }
 
-      const sanitizedPhone = phoneNumber.replace(/\./g, "_"); // punktummer er ikke tilladt i Firebase nøgler
+      const sanitizedPhone = phoneNumber.replace(/[.#$\/\[\]]/g, "_"); // Sanitize Firebase path characters
       const voteRef = ref(db, 'votes/' + sanitizedPhone);
 
       try {
@@ -54,7 +57,7 @@
         }
       } catch (error) {
         console.error("Fejl ved stemmeafgivelse:", error);
-        alert("Noget gik galt. Prøv igen.");
+        alert("Noget gik galt. Prøv igen: " + error.message);
       }
     };
   </script>
@@ -171,8 +174,8 @@
   <div class="container">
     <div class="header">
       <h1>Stem på Ugens Stjerne</h1>
-      <!-- Placeholder for your logo - replace the src with your actual logo path -->
-      <img src="/api/placeholder/60/60" alt="Logo" class="logo">
+      <!-- Logo placeholder - replace with an actual image URL when deploying -->
+      <div class="logo"></div>
     </div>
     
     <div class="form-group">
