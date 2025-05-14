@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stem på Ugens Stjerne</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvvYi9qJs7dyManXDTeZdzlJBM0LtoK2s",
+      authDomain: "norre-contact.firebaseapp.com",
+      databaseURL: "https://norre-contact-default-rtdb.firebaseio.com",
+      projectId: "norre-contact",
+      storageBucket: "norre-contact.firebasestorage.app",
+      messagingSenderId: "806156518579",
+      appId: "1:806156518579:web:df364a0e32eb82a0735cc6",
+      measurementId: "G-92RXL1M55S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.submitVote = async () => {
+      const phoneNumber = document.getElementById("phoneNumber").value.trim();
+      const voteFor = document.getElementById("voteFor").value.trim();
+
+      if (!phoneNumber.match(/^\+?\d{8,15}$/)) {
+        alert("Indtast et gyldigt telefonnummer (mindst 8 cifre).");
+        return;
+      }
+
+      if (!voteFor) {
+        alert("Du skal skrive hvem du stemmer på.");
+        return;
+      }
+
+      const sanitizedPhone = phoneNumber.replace(/\./g, "_"); // punktummer er ikke tilladt i Firebase nøgler
+      const voteRef = ref(db, 'votes/' + sanitizedPhone);
+
+      try {
+        const snapshot = await get(voteRef);
+        if (snapshot.exists()) {
+          alert("Dette telefonnummer har allerede stemt.");
+        } else {
+          await set(voteRef, {
+            votedFor: voteFor,
+            timestamp: Date.now()
+          });
+          alert("Din stemme er registreret.");
+          document.getElementById("phoneNumber").value = "";
+          document.getElementById("voteFor").value = "";
+        }
+      } catch (error) {
+        console.error("Fejl ved stemmeafgivelse:", error);
+        alert("Noget gik galt. Prøv igen.");
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --text-color: #333;
+      --light-gray: #f5f7fa;
+      --border-color: #e0e0e0;
+      --success-color: #2ecc71;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 520px) {
+      .container {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Stem på Ugens Stjerne</h1>
+      <!-- Placeholder for your logo - replace the src with your actual logo path -->
+      <img src="/api/placeholder/60/60" alt="Logo" class="logo">
+    </div>
+    
+    <div class="form-group">
+      <label for="phoneNumber">Dit telefonnummer:</label>
+      <input type="tel" id="phoneNumber" placeholder="+4512345678" />
+    </div>
+    
+    <div class="form-group">
+      <label for="voteFor">Navnet på den person du stemmer på:</label>
+      <input type="text" id="voteFor" placeholder="Skriv navn her" />
+    </div>
+    
+    <button onclick="submitVote()">Afgiv stemme</button>
+  </div>
+</body>
+</html>
